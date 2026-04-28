@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Interview Simulator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4a6fa5;
+      --secondary: #166088;
+      --accent: #4fc3f7;
+      --dark-bg: #111;
+      --dark-text: #eee;
+      --light-bg: #f8f9fa;
+      --light-text: #212529;
+      --card-bg-dark: #222;
+      --card-bg-light: #fff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--dark-bg);
+      color: var(--dark-text);
+      line-height: 1.6;
+      padding: 2rem;
+      transition: all 0.4s ease;
+      min-height: 100vh;
+    }
+
+    body.light {
+      background-color: var(--light-bg);
+      color: var(--light-text);
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 2rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    body.light .container {
+      background-color: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    button,
+    input,
+    textarea {
+      padding: 0.75rem 1.25rem;
+      margin: 0.5rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: var(--primary);
+      color: white;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    input {
+      width: 100%;
+      max-width: 400px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--dark-text);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    body.light input {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--light-text);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.3);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--dark-text);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    body.light textarea {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--light-text);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.3);
+    }
+
+    #toggleMode {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--primary);
+    }
+
+    #bioForm {
+      padding: 2rem 0;
+    }
+
+    #bioForm p {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    #interviewSection {
+      margin-top: 2rem;
+    }
+
+    #question {
+      background-color: var(--card-bg-dark);
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin: 1.5rem 0;
+      font-size: 1.2rem;
+      text-align: left;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      min-height: 80px;
+    }
+
+    body.light #question {
+      background-color: var(--card-bg-light);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #question::before {
+      content: '"';
+      font-size: 4rem;
+      position: absolute;
+      top: -20px;
+      left: 10px;
+      color: rgba(79, 195, 247, 0.2);
+      font-family: serif;
+    }
+
+    #answerBox {
+      margin: 2rem 0;
+      text-align: left;
+    }
+
+    #answer {
+      background-color: var(--card-bg-dark);
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+      min-height: 100px;
+      text-align: left;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    body.light #answer {
+      background-color: var(--card-bg-light);
+    }
+
+    #feedback {
+      background-color: var(--card-bg-dark);
+      padding: 2rem;
+      border-radius: 10px;
+      margin: 2rem 0;
+      text-align: left;
+      white-space: pre-wrap;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    body.light #feedback {
+      background-color: var(--card-bg-light);
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      margin: 1.5rem 0;
+      overflow: hidden;
+    }
+
+    body.light .progress-container {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(79, 195, 247, 0.7);
+      }
+      70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(79, 195, 247, 0);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(79, 195, 247, 0);
+      }
+    }
+
+    .status-message {
+      margin: 1rem 0;
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1><i class="fas fa-robot"></i> AI Interview Simulator</h1>
+    <button id="toggleMode" title="Toggle Dark/Light Mode">
+      <i class="fas fa-moon"></i>
+    </button>
+
+    <div id="bioForm">
+      <p>Enter your details to generate personalized interview questions:</p>
+      <div class="progress-container hidden" id="formProgress">
+        <div class="progress-bar"></div>
+      </div>
+      <input id="name" placeholder="Your Name" required /><br />
+      <input id="role" placeholder="Job Role (e.g., Frontend Developer)" required /><br />
+      <input id="experience" placeholder="Experience Level (e.g., 2 years)" required /><br />
+      <button id="startBtn">
+        <i class="fas fa-play"></i> Start Interview
+      </button>
+    </div>
+
+    <div id="interviewSection" class="hidden">
+      <div class="progress-container">
+        <div class="progress-bar" id="interviewProgress"></div>
+      </div>
+      <p class="status-message">Question <span id="currentQ">1</span> of <span id="totalQ">5</span></p>
+      
+      <div id="question"></div>
+      <button id="recordBtn" class="pulse">
+        <i class="fas fa-microphone"></i> Record Answer
+      </button>
+      <button id="typeBtn">
+        <i class="fas fa-keyboard"></i> Type Answer
+      </button>
+      <div id="answerBox">
+        <h3><i class="fas fa-user"></i> Your Answer:</h3>
+        <textarea id="answerInput" class="hidden" placeholder="Type your answer here..."></textarea>
+        <div id="answer"></div>
+        <button id="submitAnswerBtn" class="hidden">
+          <i class="fas fa-paper-plane"></i> Submit Answer
+        </button>
+      </div>
+    </div>
+
+    <div id="feedback" class="hidden"></div>
+    <button id="copyFeedbackBtn" class="hidden">
+      <i class="fas fa-copy"></i> Copy Feedback
+    </button>
+    <button id="newInterviewBtn" class="hidden">
+      <i class="fas fa-redo"></i> Start New Interview
+    </button>
+  </div>
+
+  <script>
+    const CONFIG = {
+      API_KEY: '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',
+      MODEL: 'openai/gpt-3.5-turbo',
+      GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxvqXGxfrLdGxvVlKlJ0mvR51ZYEhrIxUQMf_e-vaacNO89JU11qa-Jk6B7iLEXjiO0/exec',
+      TOTAL_QUESTIONS: 5
+    };
+
+    const state = {
+      currentQuestion: 0,
+      questions: [],
+      answers: [],
+      userBio: {},
+      recognition: null
+    };
+
+    const elements = {
+      toggleMode: document.getElementById('toggleMode'),
+      startBtn: document.getElementById('startBtn'),
+      recordBtn: document.getElementById('recordBtn'),
+      typeBtn: document.getElementById('typeBtn'),
+      submitAnswerBtn: document.getElementById('submitAnswerBtn'),
+      copyFeedbackBtn: document.getElementById('copyFeedbackBtn'),
+      newInterviewBtn: document.getElementById('newInterviewBtn'),
+      bioForm: document.getElementById('bioForm'),
+      interviewSection: document.getElementById('interviewSection'),
+      formProgress: document.getElementById('formProgress'),
+      interviewProgress: document.getElementById('interviewProgress'),
+      question: document.getElementById('question'),
+      answer: document.getElementById('answer'),
+      answerInput: document.getElementById('answerInput'),
+      feedback: document.getElementById('feedback'),
+      currentQ: document.getElementById('currentQ'),
+      totalQ: document.getElementById('totalQ'),
+      name: document.getElementById('name'),
+      role: document.getElementById('role'),
+      experience: document.getElementById('experience')
+    };
+
+    // Theme toggle
+    elements.toggleMode.addEventListener('click', () => {
+      document.body.classList.toggle('light');
+      const icon = elements.toggleMode.querySelector('i');
+      icon.className = document.body.classList.contains('light') ? 'fas fa-sun' : 'fas fa-moon';
+    });
+
+    // Start interview
+    elements.startBtn.addEventListener('click', async () => {
+      state.userBio = {
+        name: elements.name.value.trim(),
+        role: elements.role.value.trim(),
+        experience: elements.experience.value.trim()
+      };
+
+      if (!state.userBio.name || !state.userBio.role || !state.userBio.experience) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      elements.startBtn.disabled = true;
+      await animateFormSubmission();
+      await askNextQuestion();
+    });
+
+    // Record answer
+    elements.recordBtn.addEventListener('click', recordAnswer);
+
+    // Type answer
+    elements.typeBtn.addEventListener('click', toggleTypeMode);
+
+    // Submit typed answer
+    elements.submitAnswerBtn.addEventListener('click', submitTypedAnswer);
+
+    // Copy feedback
+    elements.copyFeedbackBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(elements.feedback.innerText).then(() => {
+        const originalHTML = elements.copyFeedbackBtn.innerHTML;
+        elements.copyFeedbackBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+          elements.copyFeedbackBtn.innerHTML = originalHTML;
+        }, 2000);
+      });
+    });
+
+    // New interview
+    elements.newInterviewBtn.addEventListener('click', resetInterview);
+
+    async function animateFormSubmission() {
+      elements.formProgress.classList.remove('hidden');
+      const progressBar = elements.formProgress.querySelector('.progress-bar');
+      
+      return new Promise(resolve => {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 2;
+          progressBar.style.width = `${progress}%`;
+          
+          if (progress >= 100) {
+            clearInterval(interval);
+            elements.bioForm.classList.add('hidden');
+            elements.interviewSection.classList.remove('hidden');
+            elements.totalQ.textContent = CONFIG.TOTAL_QUESTIONS;
+            updateProgress();
+            resolve();
+          }
+        }, 20);
+      });
+    }
+
+    async function callAPI(prompt) {
+      try {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${CONFIG.API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: CONFIG.MODEL,
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+
+        const data = await res.json();
+        return data?.choices?.[0]?.message?.content || "Failed to get response.";
+      } catch (error) {
+        console.error("API Error:", error);
+        return "Sorry, there was an error. Please try again.";
+      }
+    }
+
+    async function askNextQuestion() {
+      if (state.currentQuestion >= CONFIG.TOTAL_QUESTIONS) {
+        return getFeedback();
+      }
+
+      elements.currentQ.textContent = state.currentQuestion + 1;
+      elements.question.innerHTML = '<div class="status-message"><i class="fas fa-spinner fa-spin"></i> Generating question...</div>';
+      elements.answer.innerText = '';
+      elements.recordBtn.disabled = true;
+      elements.typeBtn.disabled = true;
+      
+      const prompt = `Ask job interview question #${state.currentQuestion + 1} for a ${state.userBio.role} with ${state.userBio.experience} experience. Make it challenging but appropriate for their level.`;
+      const question = await callAPI(prompt);
+      
+      state.questions.push(question);
+      elements.question.innerHTML = question;
+      
+      elements.recordBtn.disabled = false;
+      elements.recordBtn.classList.add('pulse');
+      elements.typeBtn.disabled = false;
+    }
+
+    function recordAnswer() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+        return;
+      }
+
+      elements.recordBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Listening...';
+      elements.recordBtn.classList.remove('pulse');
+      elements.recordBtn.disabled = true;
+      elements.typeBtn.disabled = true;
+      
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      state.recognition = new SpeechRecognition();
+      state.recognition.lang = 'en-US';
+      state.recognition.interimResults = false;
+      state.recognition.maxAlternatives = 1;
+
+      state.recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        elements.answer.innerText = transcript;
+        state.answers.push(transcript);
+        
+        showStatusMessage('answerBox', '<i class="fas fa-save"></i> Saving your answer...');
+        await saveToSheets(state.questions[state.currentQuestion], transcript);
+        
+        setTimeout(() => {
+          removeStatusMessage('answerBox');
+          state.currentQuestion++;
+          updateProgress();
+          resetRecordButton();
+          setTimeout(askNextQuestion, 1000);
+        }, 1500);
+      };
+
+      state.recognition.onerror = (event) => {
+        alert("Speech recognition error: " + event.error);
+        resetRecordButton();
+      };
+
+      state.recognition.start();
+    }
+
+    function resetRecordButton() {
+      elements.recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record Answer';
+      elements.recordBtn.classList.add('pulse');
+      elements.recordBtn.disabled = false;
+      elements.typeBtn.disabled = false;
+    }
+
+    function toggleTypeMode() {
+      const isTyping = !elements.answerInput.classList.contains('hidden');
+      
+      if (isTyping) {
+        // Switch back to record mode
+        elements.answerInput.classList.add('hidden');
+        elements.submitAnswerBtn.classList.add('hidden');
+        elements.answer.classList.remove('hidden');
+        elements.recordBtn.classList.remove('hidden');
+        elements.typeBtn.innerHTML = '<i class="fas fa-keyboard"></i> Type Answer';
+      } else {
+        // Switch to type mode
+        elements.answerInput.classList.remove('hidden');
+        elements.submitAnswerBtn.classList.remove('hidden');
+        elements.answer.classList.add('hidden');
+        elements.recordBtn.classList.add('hidden');
+        elements.typeBtn.innerHTML = '<i class="fas fa-microphone"></i> Record Instead';
+        elements.answerInput.value = '';
+        elements.answerInput.focus();
+      }
+    }
+
+    async function submitTypedAnswer() {
+      const typedAnswer = elements.answerInput.value.trim();
+      
+      if (!typedAnswer) {
+        alert('Please type your answer before submitting.');
+        return;
+      }
+
+      elements.submitAnswerBtn.disabled = true;
+      elements.typeBtn.disabled = true;
+      elements.answerInput.disabled = true;
+
+      elements.answer.innerText = typedAnswer;
+      state.answers.push(typedAnswer);
+      
+      showStatusMessage('answerBox', '<i class="fas fa-save"></i> Saving your answer...');
+      await saveToSheets(state.questions[state.currentQuestion], typedAnswer);
+      
+      setTimeout(() => {
+        removeStatusMessage('answerBox');
+        state.currentQuestion++;
+        updateProgress();
+        
+        // Reset typing interface
+        elements.answerInput.classList.add('hidden');
+        elements.submitAnswerBtn.classList.add('hidden');
+        elements.answer.classList.remove('hidden');
+        elements.recordBtn.classList.remove('hidden');
+        elements.typeBtn.innerHTML = '<i class="fas fa-keyboard"></i> Type Answer';
+        elements.submitAnswerBtn.disabled = false;
+        elements.typeBtn.disabled = false;
+        elements.answerInput.disabled = false;
+        elements.answerInput.value = '';
+        
+        setTimeout(askNextQuestion, 1000);
+      }, 1500);
+    }
+
+    function updateProgress() {
+      const progress = (state.currentQuestion / CONFIG.TOTAL_QUESTIONS) * 100;
+      elements.interviewProgress.style.width = `${progress}%`;
+    }
+
+    async function getFeedback() {
+      elements.interviewSection.classList.add('hidden');
+      elements.feedback.innerHTML = '<div class="status-message"><i class="fas fa-spinner fa-spin"></i> Analyzing your interview...</div>';
+      elements.feedback.classList.remove('hidden');
+      
+      const qaText = state.questions.map((q, i) => `Q${i + 1}: ${q}\nA${i + 1}: ${state.answers[i]}`).join("\n\n");
+      const prompt = `You are an expert interview evaluator. Based on the following interview questions and answers for a ${state.userBio.role} with ${state.userBio.experience} experience, provide detailed feedback.\n\nInclude:\n- Strengths\n- Weaknesses\n- Suggestions for improvement\n- Overall Score (X/10) with justification\n\nFormat with clear headings and bullet points.\n\n${qaText}`;
+
+      const feedback = await callAPI(prompt);
+      elements.feedback.innerHTML = feedback;
+      elements.copyFeedbackBtn.classList.remove('hidden');
+      elements.newInterviewBtn.classList.remove('hidden');
+    }
+
+    async function saveToSheets(question, answer) {
+      try {
+        await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            timestamp: new Date().toISOString(),
+            name: state.userBio.name,
+            role: state.userBio.role,
+            experience: state.userBio.experience,
+            question,
+            answer
+          })
+        });
+      } catch (error) {
+        console.error("Error saving to Google Sheets:", error);
+      }
+    }
+
+    function showStatusMessage(parentId, message) {
+      const parent = document.getElementById(parentId);
+      const statusDiv = document.createElement('div');
+      statusDiv.className = 'status-message';
+      statusDiv.innerHTML = message;
+      statusDiv.dataset.statusMessage = 'true';
+      parent.appendChild(statusDiv);
+    }
+
+    function removeStatusMessage(parentId) {
+      const parent = document.getElementById(parentId);
+      const statusMsg = parent.querySelector('[data-status-message]');
+      if (statusMsg) statusMsg.remove();
+    }
+
+    function resetInterview() {
+      // Reset state
+      Object.assign(state, {
+        currentQuestion: 0,
+        questions: [],
+        answers: [],
+        userBio: {},
+        recognition: null
+      });
+      
+      // Reset UI
+      elements.bioForm.classList.remove('hidden');
+      elements.interviewSection.classList.add('hidden');
+      elements.feedback.classList.add('hidden');
+      elements.copyFeedbackBtn.classList.add('hidden');
+      elements.newInterviewBtn.classList.add('hidden');
+      
+      // Reset form
+      elements.name.value = '';
+      elements.role.value = '';
+      elements.experience.value = '';
+      elements.startBtn.disabled = false;
+      
+      // Reset progress
+      elements.formProgress.querySelector('.progress-bar').style.width = '0%';
+      elements.interviewProgress.style.width = '0%';
+    }
+  </script>
+</body>
+
+</html>
